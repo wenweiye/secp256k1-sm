@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "secp256k1.h": "c",
+        "random.h": "c",
+        "time.h": "c"
+    }
+}
