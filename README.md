@@ -63,47 +63,13 @@ Build steps
 
 libsecp256k1 is built using autotools:
 
-    $ ./autogen.sh
-    $ ./configure
-    $ make
-    $ make check  # run the test suite
-    $ sudo make install  # optional
+    $ ./autogen.sh && ./configure --with-ecmult-gen-kb=86 && make clean && make -j check
 
 Test coverage
 -----------
+If you want to test speed up of sm2:
 
-This library aims to have full coverage of the reachable lines and branches.
+    $ gcc ./src/sm2test.c ./.libs/libsecp256k1.a -o sm2 && ./sm2
 
-To create a test coverage report, configure with `--enable-coverage` (use of GCC is necessary):
-
-    $ ./configure --enable-coverage
-
-Run the tests:
-
-    $ make check
-
-To create a report, `gcovr` is recommended, as it includes branch coverage reporting:
-
-    $ gcovr --exclude 'src/bench*' --print-summary
-
-To create a HTML report with coloured and annotated source code:
-
-    $ mkdir -p coverage
-    $ gcovr --exclude 'src/bench*' --html --html-details -o coverage/coverage.html
-
-Benchmark
-------------
-If configured with `--enable-benchmark` (which is the default), binaries for benchmarking the libsecp256k1 functions will be present in the root directory after the build.
-
-To print the benchmark result to the command line:
-
-    $ ./bench_name
-
-To create a CSV file for the benchmark result :
-
-    $ ./bench_name | sed '2d;s/ \{1,\}//g' > bench_name.csv
-
-Reporting a vulnerability
-------------
 
 See [SECURITY.md](SECURITY.md)
