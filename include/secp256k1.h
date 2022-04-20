@@ -820,6 +820,11 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_tagged_sha256(
 int secp256k1_sm2_precomputed(const secp256k1_context* ctx, const unsigned char *seckey, unsigned char *seckeyInv, unsigned char *seckeyInvSeckey);
 void print_hex(unsigned char* data, size_t size);
 int fill_random(unsigned char* data, size_t size);
+
+int secp256k1_sm2_encryption(const secp256k1_context* ctx, const unsigned char *msg, const secp256k1_pubkey *pubkey, secp256k1_nonce_function noncefp, const void* noncedata, unsigned char *cip);
+
+int secp256k1_sm2_decryption(const unsigned char *cip, unsigned char *msg, const unsigned char *seckey);
+
 #ifdef __cplusplus
 }
 #endif
