@@ -7,6 +7,7 @@
 #include "field.h"
 #include "group.h"
 #include "ecmult_gen.h"
+#include "sm2.h"
 
 static int secp256k1_sm2_sig_sign(const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar *sigr, secp256k1_scalar *sigs, const secp256k1_scalar *seckeyInv, const secp256k1_scalar *seckeyInvSeckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce) {
     unsigned char b[32];
