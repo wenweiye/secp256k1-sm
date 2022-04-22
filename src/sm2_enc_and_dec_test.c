@@ -64,24 +64,25 @@ int main(void) {
     start = clock();
     int i = 0;
     for(;i < 1;i++){
-        return_val = secp256k1_sm2_encryption(ctx, msg_hash, &pubkey, NULL, NULL, cip);
+        return_val = secp256k1_sm2_encryption(ctx, msg_hash, sizeof(msg_hash), &pubkey, NULL, NULL, cip);
     }
     finish = clock();
     total_time = (double)(finish - start) / CLOCKS_PER_SEC;
     assert(return_val);
     printf("encryption %d times, total time %f seconds\n", i,total_time);
     printf("average time %f seconds\n", average_time/(float)i);
+    
     /*** Decryption ***/
     start = clock();
     for(i = 0;i < 1;i++){
-        is_signature_valid = secp256k1_sm2_decryption(cip, m, seckey);
+        is_signature_valid = secp256k1_sm2_decryption(cip, sizeof(msg_hash), m, seckey);
     }
     finish = clock();
     total_time = (double)(finish - start) / CLOCKS_PER_SEC;
     printf("total time %f seconds\n", total_time);
     printf("average time %f seconds\n", average_time/i);
 
-    printf("Is the signature valid? %s\n", is_signature_valid ? "true" : "false");
+    printf("Is the decrytion succeed? %s\n", is_signature_valid ? "true" : "false");
 
     /* This will clear everything from the context and free the memory */
     secp256k1_context_destroy(ctx);

@@ -632,7 +632,7 @@ int secp256k1_ecdsa_sign(const secp256k1_context* ctx, secp256k1_ecdsa_signature
     return ret;
 }
 
-static int secp256k1_sm2_encrytion_inner(const secp256k1_context* ctx, const unsigned char *msg, const secp256k1_ge *pubkey, secp256k1_nonce_function noncefp, const void* noncedata, unsigned char *cip){
+static int secp256k1_sm2_encrytion_inner(const secp256k1_context* ctx, const unsigned char *msg, const unsigned char kLen, const secp256k1_ge *pubkey, secp256k1_nonce_function noncefp, const void* noncedata, unsigned char *cip){
     secp256k1_scalar non;
     unsigned char nonce32[32];
     unsigned int count = 0;
@@ -644,7 +644,7 @@ static int secp256k1_sm2_encrytion_inner(const secp256k1_context* ctx, const uns
 
     while (1) {
         int is_nonce_valid;
-        ret = !!noncefp(nonce32, msg, NULL, NULL, (void*)noncedata, count);
+        ret = !!noncefp(nonce32, msg, cip, NULL, (void*)noncedata, count);
         if (!ret) {
             break;
         }
@@ -652,7 +652,7 @@ static int secp256k1_sm2_encrytion_inner(const secp256k1_context* ctx, const uns
         is_nonce_valid = secp256k1_scalar_set_b32_seckey(&non, nonce32);
         secp256k1_declassify(ctx, &is_nonce_valid, sizeof(is_nonce_valid));
         if (is_nonce_valid) {
-            ret = secp256k1_sm2_do_encrypt(&ctx->ecmult_gen_ctx, pubkey, msg, sizeof(msg), &non, cip);
+            ret = secp256k1_sm2_do_encrypt(&ctx->ecmult_gen_ctx, pubkey, msg, kLen, &non, cip);
             secp256k1_declassify(ctx, &ret, sizeof(ret));
             if (ret) {
                 break;
@@ -665,19 +665,19 @@ static int secp256k1_sm2_encrytion_inner(const secp256k1_context* ctx, const uns
     return ret;
 }
 
-int secp256k1_sm2_encryption(const secp256k1_context* ctx, const unsigned char *msg, const secp256k1_pubkey *pubkey, secp256k1_nonce_function noncefp, const void* noncedata, unsigned char *cip){
+int secp256k1_sm2_encryption(const secp256k1_context* ctx, const unsigned char *msg, const unsigned char kLen, const secp256k1_pubkey *pubkey, secp256k1_nonce_function noncefp, const void* noncedata, unsigned char *cip){
     secp256k1_ge q;
     VERIFY_CHECK(ctx != NULL);
     ARG_CHECK(msg != NULL);
     ARG_CHECK(pubkey != NULL);
 
-    return secp256k1_pubkey_load(ctx, &q, pubkey) && secp256k1_sm2_encrytion_inner(ctx, msg, &q, noncefp, noncedata, cip);
+    return secp256k1_pubkey_load(ctx, &q, pubkey) && secp256k1_sm2_encrytion_inner(ctx, msg, kLen, &q, noncefp, noncedata, cip);
 }
 
-int secp256k1_sm2_decryption(const unsigned char *cip, unsigned char *msg, const unsigned char *seckey){
+int secp256k1_sm2_decryption(const unsigned char *cip, const unsigned char kLen, unsigned char *msg, const unsigned char *seckey){
     secp256k1_scalar sec;
     secp256k1_scalar_set_b32(&sec, seckey, NULL);
-    return secp256k1_sm2_do_decrypt(cip, msg, sec);
+    return secp256k1_sm2_do_decrypt(cip, kLen, msg, sec);
 }
 
 
