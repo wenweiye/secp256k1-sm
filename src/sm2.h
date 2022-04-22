@@ -19,7 +19,6 @@ typedef struct {
 	uint8_t ciphertext[SM2_MAX_PLAINTEXT_SIZE];
 } SM2_CIPHERTEXT;
 
-static int secp256k1_sm2_precomputed(const unsigned char *seckey, unsigned char *seckeyInv, unsigned char *seckeyInvSeckey);
 int secp256k1_sm2_do_encrypt(const secp256k1_ecmult_gen_context *ctx, const secp256k1_ge *pubkey, const unsigned char *message, int kLen, const secp256k1_scalar *nonce, unsigned char *C);
 
 int secp256k1_sm2_do_decrypt(const unsigned char *cip, unsigned char *messsage, const secp256k1_scalar sec);
