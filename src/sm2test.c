@@ -13,7 +13,7 @@
 
 #include <secp256k1.h>
 
-// #include "random.h"
+#include <random.h>
 #include <time.h>
 
 
@@ -96,9 +96,8 @@ int main(void) {
     double total_time, average_time;
     start = clock();
     int i = 0;
-    for(;i < 1;i++){
+    for(;i < 100000;i++){
         return_val = secp256k1_sm2_sign(ctx, &sig, msg_hash, seckey, seckeyInv, seckeyInvSeckey, NULL, NULL);
-        i++;
     }
     finish = clock();
     total_time = (double)(finish - start) / CLOCKS_PER_SEC;

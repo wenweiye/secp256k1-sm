@@ -8,8 +8,8 @@
 #include "group.h"
 #include "ecmult_gen.h"
 #include "sm3.h"
-#include "sm2.h"
 #include "endian.h"
+#include "sm2.h"
 
 int sm2_kdf(const uint8_t *in, size_t inlen, size_t outlen, uint8_t *out)
 {

@@ -8,6 +8,7 @@ AM_CFLAGS = $(SECP_CFLAGS)
 
 lib_LTLIBRARIES = libsecp256k1.la
 include_HEADERS = include/secp256k1.h
+include_HEADERS += include/random.h
 include_HEADERS += include/secp256k1_preallocated.h
 noinst_HEADERS =
 noinst_HEADERS += src/scalar.h
@@ -22,6 +23,8 @@ noinst_HEADERS += src/group.h
 noinst_HEADERS += src/group_impl.h
 noinst_HEADERS += src/ecdsa.h
 noinst_HEADERS += src/ecdsa_impl.h
+noinst_HEADERS += src/sm2.h
+noinst_HEADERS += src/sm2_impl.h
 noinst_HEADERS += src/eckey.h
 noinst_HEADERS += src/eckey_impl.h
 noinst_HEADERS += src/ecmult.h

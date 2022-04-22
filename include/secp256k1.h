@@ -817,14 +817,34 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_tagged_sha256(
     size_t msglen
 ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(5);
 
-int secp256k1_sm2_precomputed(const secp256k1_context* ctx, const unsigned char *seckey, unsigned char *seckeyInv, unsigned char *seckeyInvSeckey);
-void print_hex(unsigned char* data, size_t size);
-int fill_random(unsigned char* data, size_t size);
-
 int secp256k1_sm2_encryption(const secp256k1_context* ctx, const unsigned char *msg, const secp256k1_pubkey *pubkey, secp256k1_nonce_function noncefp, const void* noncedata, unsigned char *cip);
 
 int secp256k1_sm2_decryption(const unsigned char *cip, unsigned char *msg, const unsigned char *seckey);
 
+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_sm2_sign(
+    const secp256k1_context* ctx, 
+    secp256k1_ecdsa_signature *signature, 
+    const unsigned char *msghash32, 
+    const unsigned char *seckey, 
+    const unsigned char *seckeyInv, 
+    const unsigned char *seckeyInvSeckey, 
+    secp256k1_nonce_function noncefp, 
+    const void* noncedata
+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4) SECP256K1_ARG_NONNULL(5) SECP256K1_ARG_NONNULL(6);
+
+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_sm2_verify(
+    const secp256k1_context* ctx, 
+    const secp256k1_ecdsa_signature *sig, 
+    const unsigned char *msghash32, 
+    const secp256k1_pubkey *pubkey
+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);
+
+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_sm2_precomputed(
+    const secp256k1_context* ctx, 
+    const unsigned char *seckey, 
+    unsigned char *seckeyInv, 
+    unsigned char *seckeyInvSeckey)
+SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2);
 #ifdef __cplusplus
 }
 #endif

@@ -131,7 +131,7 @@ static void bench_sm2_sign_setup(void* arg) {
     for (i = 0; i < 32; i++) {
         data->key[i] = i + 65;
     }
-    secp256k1_sm2_precomputed(data->ctx, data->key, data->keyInv, data->keyInvkey);
+    /*secp256k1_sm2_precomputed(data->ctx, data->key, data->keyInv, data->keyInvkey);*/
 }
 
 static void bench_sign_run(void* arg, int iters) {
