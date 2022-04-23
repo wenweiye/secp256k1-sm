@@ -103,7 +103,6 @@ int main(void) {
     total_time = (double)(finish - start) / CLOCKS_PER_SEC;
     assert(return_val);
     printf("total time %f seconds\n", total_time);
-    printf("average time %f seconds\n", average_time/100000);
     /* Serialize the signature in a compact form. Should always return 1
      * according to the documentation in secp256k1.h. */
     return_val = secp256k1_ecdsa_signature_serialize_compact(ctx, serialized_signature, &sig);

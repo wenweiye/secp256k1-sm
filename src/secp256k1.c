@@ -24,6 +24,7 @@
 #include "hash_impl.h"
 #include "scratch_impl.h"
 #include "selftest.h"
+#include <time.h>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -544,7 +545,9 @@ static int secp256k1_ecdsa_sign_inner(const secp256k1_context* ctx, secp256k1_sc
 static int secp256k1_sm2_sign_inner(const secp256k1_context* ctx, secp256k1_scalar* r, secp256k1_scalar* s, int* recid, const unsigned char *msg32, const unsigned char *seckey, const unsigned char *seckeyInv,const unsigned char *seckeyInvSeckey,secp256k1_nonce_function noncefp, const void* noncedata) {
     secp256k1_scalar secInv, secInvSec, non, msg;
     int ret = 0;
-    unsigned char nonce32[32];
+    unsigned char nonce32[32] = {
+        0xb4,0xe2,0x13,0x48,0x40,0x97,0xec,0xcc,0xe9,0x62,0x5f,0xac,0xc8,0x14,0x13,0x5f,0x5a,0x2f,0x07,0x2e,0x17,0xde,0x39,0x87,0xe1,0xa6,0xdc,0x45,0x00,0xc3,0xc6,0x6b
+    };
     unsigned int count = 0;
     /* Default initialization here is important so we won't pass uninit values to the cmov in the end */
     *r = secp256k1_scalar_zero;
@@ -563,10 +566,11 @@ static int secp256k1_sm2_sign_inner(const secp256k1_context* ctx, secp256k1_scal
 
     while (1) {
         int is_nonce_valid;
-        ret = !!noncefp(nonce32, msg32, seckey, NULL, (void*)noncedata, count);
-        if (!ret) {
-            break;
-        }
+        // ret = !!noncefp(nonce32, msg32, seckey, NULL, (void*)noncedata, count);
+        // print_hex(nonce32,sizeof(nonce32));
+        // if (!ret) {
+        //     break;
+        // }
         
         is_nonce_valid = secp256k1_scalar_set_b32_seckey(&non, nonce32);
         /* The nonce is still secret here, but it being invalid is is less likely than 1:2^255. */
