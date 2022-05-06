@@ -115,6 +115,8 @@ typedef struct {
     /* Factor used for projective blinding. This value is used to rescale the Z
      * coordinate of the first table lookup. */
     secp256k1_fe proj_blind;
+    secp256k1_gej table[8192];
+    secp256k1_ge tables[8192];
 } secp256k1_ecmult_gen_context;
 
 static void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context* ctx);

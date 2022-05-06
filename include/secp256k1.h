@@ -44,7 +44,6 @@ extern "C" {
  *  you do not need any locking for the other calls), or use a read-write lock.
  */
 typedef struct secp256k1_context_struct secp256k1_context;
-
 /** Opaque data structure that holds rewriteable "scratch space"
  *
  *  The purpose of this structure is to replace dynamic memory allocations,
@@ -792,6 +791,10 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_ec_pubkey_combine(
     size_t n
 ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);
 
+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int generateTable(
+    secp256k1_context* ctx
+)SECP256K1_ARG_NONNULL(1);
+
 /** Compute a tagged hash as defined in BIP-340.
  *
  *  This is useful for creating a message hash and achieving domain separation
@@ -817,9 +820,22 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_tagged_sha256(
     size_t msglen
 ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(5);
 
-int secp256k1_sm2_encryption(const secp256k1_context* ctx, const unsigned char *msg, const unsigned char kLen,const secp256k1_pubkey *pubkey, secp256k1_nonce_function noncefp, const void* noncedata, unsigned char *cip);
+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_sm2_encryption(
+    const secp256k1_context* ctx, 
+    const unsigned char *msg, 
+    const unsigned char kLen, 
+    const secp256k1_pubkey *pubkey, 
+    secp256k1_nonce_function noncefp, 
+    const void* noncedata, 
+    unsigned char *cip
+);
 
-int secp256k1_sm2_decryption(const unsigned char *cip, const unsigned char kLen,unsigned char *msg, const unsigned char *seckey);
+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_sm2_decryption(
+    const unsigned char *cip, 
+    const unsigned char kLen,
+    unsigned char *msg, 
+    const unsigned char *seckey
+);
 
 SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_sm2_sign(
     const secp256k1_context* ctx, 

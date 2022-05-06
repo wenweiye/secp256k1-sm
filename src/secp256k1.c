@@ -372,6 +372,33 @@ int secp256k1_ecdsa_signature_parse_compact(const secp256k1_context* ctx, secp25
     return ret;
 }
 
+
+static void secp256k1_ecmult_gen_compute_table_memery(secp256k1_ecmult_gen_context *ctx,int bits) {
+    int g = 256;
+    int n = 32;
+    secp256k1_scalar base, tmp, tmp1;
+    int i, j;
+    {
+        base = secp256k1_scalar_two;
+        for (i = 0; i < n; i++) {
+            for (j = 1; j < bits; j++) {
+                secp256k1_scalar_add(&base, &base, &base);
+            }
+            tmp1 = secp256k1_scalar_zero;
+            for (j = 0; j < g; j++) {
+                secp256k1_scalar_add(&tmp1, &tmp1, &secp256k1_scalar_one);
+                secp256k1_scalar_mul(&tmp, &base, &tmp1);
+                secp256k1_ecmult_gen2(ctx, &ctx->table[i*g+j], &tmp);
+                secp256k1_ge_set_gej(&ctx->tables[i*g+j], &ctx->table[i*g+j]);
+            }
+        }
+    }
+}
+
+int generateTable(secp256k1_context* ctx){
+    secp256k1_ecmult_gen_compute_table_memery(&ctx->ecmult_gen_ctx,8);
+}
+
 int secp256k1_ecdsa_signature_serialize_der(const secp256k1_context* ctx, unsigned char *output, size_t *outputlen, const secp256k1_ecdsa_signature* sig) {
     secp256k1_scalar r, s;
 
@@ -546,7 +573,10 @@ static int secp256k1_sm2_sign_inner(const secp256k1_context* ctx, secp256k1_scal
     secp256k1_scalar secInv, secInvSec, non, msg;
     int ret = 0;
     unsigned char nonce32[32] = {
-        0xb4,0xe2,0x13,0x48,0x40,0x97,0xec,0xcc,0xe9,0x62,0x5f,0xac,0xc8,0x14,0x13,0x5f,0x5a,0x2f,0x07,0x2e,0x17,0xde,0x39,0x87,0xe1,0xa6,0xdc,0x45,0x00,0xc3,0xc6,0x6b
+        0x31, 0x5F, 0x5B, 0xDB, 0x76, 0xD0, 0x78, 0xC4,
+        0x3B, 0x8A, 0xC0, 0x06, 0x4E, 0x4A, 0x01, 0x64,
+        0x61, 0x2B, 0x1F, 0xCE, 0x77, 0xC8, 0x69, 0x34,
+        0x5B, 0xFC, 0x94, 0xC7, 0x58, 0x94, 0xED, 0xD3,
     };
     unsigned int count = 0;
     /* Default initialization here is important so we won't pass uninit values to the cmov in the end */
@@ -566,11 +596,12 @@ static int secp256k1_sm2_sign_inner(const secp256k1_context* ctx, secp256k1_scal
 
     while (1) {
         int is_nonce_valid;
-        // ret = !!noncefp(nonce32, msg32, seckey, NULL, (void*)noncedata, count);
-        // print_hex(nonce32,sizeof(nonce32));
-        // if (!ret) {
-        //     break;
-        // }
+        /*
+        ret = !!noncefp(nonce32, msg32, seckey, NULL, (void*)noncedata, count);
+        if (!ret) {
+            break;
+        }
+        */
         
         is_nonce_valid = secp256k1_scalar_set_b32_seckey(&non, nonce32);
         /* The nonce is still secret here, but it being invalid is is less likely than 1:2^255. */
@@ -578,7 +609,7 @@ static int secp256k1_sm2_sign_inner(const secp256k1_context* ctx, secp256k1_scal
         if (is_nonce_valid) {
             ret = secp256k1_sm2_sig_sign(&ctx->ecmult_gen_ctx, r, s, &secInv, &secInvSec,&msg, &non);
             /* The final signature is no longer a secret, nor is the fact that we were successful or not. */
-            secp256k1_declassify(ctx, &ret, sizeof(ret));
+            // secp256k1_declassify(ctx, &ret, sizeof(ret));
             if (ret) {
                 break;
             }
@@ -689,13 +720,13 @@ int secp256k1_sm2_decryption(const unsigned char *cip, const unsigned char kLen,
 int secp256k1_sm2_sign(const secp256k1_context* ctx, secp256k1_ecdsa_signature *signature, const unsigned char *msghash32, const unsigned char *seckey, const unsigned char *seckeyInv, const unsigned char *seckeyInvSeckey, secp256k1_nonce_function noncefp, const void* noncedata) {
     secp256k1_scalar r, s;
     int ret;
-    VERIFY_CHECK(ctx != NULL);
-    ARG_CHECK(secp256k1_ecmult_gen_context_is_built(&ctx->ecmult_gen_ctx));
-    ARG_CHECK(msghash32 != NULL);
-    ARG_CHECK(signature != NULL);
-    ARG_CHECK(seckey != NULL);
-    ARG_CHECK(seckeyInv != NULL);
-    ARG_CHECK(seckeyInvSeckey != NULL);
+    // VERIFY_CHECK(ctx != NULL);
+    // ARG_CHECK(secp256k1_ecmult_gen_context_is_built(&ctx->ecmult_gen_ctx));
+    // ARG_CHECK(msghash32 != NULL);
+    // ARG_CHECK(signature != NULL);
+    // ARG_CHECK(seckey != NULL);
+    // ARG_CHECK(seckeyInv != NULL);
+    // ARG_CHECK(seckeyInvSeckey != NULL);
 
     ret = secp256k1_sm2_sign_inner(ctx, &r, &s, NULL, msghash32, seckey, seckeyInv, seckeyInvSeckey,noncefp, noncedata);
     secp256k1_ecdsa_signature_save(signature, &r, &s);

@@ -187,8 +187,8 @@ static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp25
              * result in sign. */
             sign = (bits >> (COMB_TEETH - 1)) & 1;
             abs = (bits ^ -sign) & (COMB_POINTS - 1);
-            VERIFY_CHECK(sign == 0 || sign == 1);
-            VERIFY_CHECK(abs < COMB_POINTS);
+            // VERIFY_CHECK(sign == 0 || sign == 1);
+            // VERIFY_CHECK(abs < COMB_POINTS);
 
             /** This uses a conditional move to avoid any secret data in array indexes.
              *   _Any_ use of secret indexes has been demonstrated to result in timing
@@ -235,6 +235,88 @@ static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp25
     secp256k1_ge_clear(&add);
     memset(&adds, 0, sizeof(adds));
     memset(&recoded, 0, sizeof(recoded));
+}
+
+static void secp256k1_ecmult_gen2(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {
+    uint32_t comb_off;
+    secp256k1_ge add;
+    secp256k1_fe neg;
+    secp256k1_ge_storage adds;
+    secp256k1_scalar tmp;
+    uint32_t recoded[(COMB_BITS + 31) >> 5] = {0};
+    int first = 1, i;
+
+    memset(&adds, 0, sizeof(adds));
+    secp256k1_scalar_add(&tmp, &ctx->scalar_offset, gn);
+    for (i = 0; i < 8 && i < ((COMB_BITS + 31) >> 5); ++i) {
+        recoded[i] = secp256k1_scalar_get_bits(&tmp, 32 * i, 32);
+    }
+    secp256k1_scalar_clear(&tmp);
+    comb_off = COMB_SPACING - 1;
+    while (1) {
+        uint32_t block;
+        uint32_t bit_pos = comb_off;
+        for (block = 0; block < COMB_BLOCKS; ++block) {
+            uint32_t bits = 0, sign, abs, index, tooth;
+            for (tooth = 0; tooth < COMB_TEETH; ++tooth) {
+                uint32_t bitdata = recoded[bit_pos >> 5] >> (bit_pos & 0x1f);
+                bits &= ~(1 << tooth);
+                bits ^= bitdata << tooth;
+                bit_pos += COMB_SPACING;
+            }
+
+            sign = (bits >> (COMB_TEETH - 1)) & 1;
+            abs = (bits ^ -sign) & (COMB_POINTS - 1);
+
+            for (index = 0; index < COMB_POINTS; ++index) {
+                secp256k1_ge_storage_cmov(&adds, &secp256k1_ecmult_gen_prec_table[block][index], index == abs);
+            }
+
+            /* Set add=adds or add=-adds, in constant time, based on sign. */
+            secp256k1_ge_from_storage(&add, &adds);
+            secp256k1_fe_negate(&neg, &add.y, 1);
+            secp256k1_fe_cmov(&add.y, &neg, sign);
+
+            /* Add the looked up and conditionally negated value to r. */
+            if (EXPECT(first, 0)) {
+                /* If this is the first table lookup, we can skip addition. */
+                secp256k1_gej_set_ge(r, &add);
+                /* Give the entry a random Z coordinate to blind intermediary results. */
+                first = 0;
+            } else {
+                secp256k1_gej_add_ge(r, r, &add);
+            }
+        }
+        if (comb_off-- == 0) break;
+        secp256k1_gej_double(r, r);
+    }
+    secp256k1_fe_clear(&neg);
+    secp256k1_ge_clear(&add);
+    memset(&adds, 0, sizeof(adds));
+    memset(&recoded, 0, sizeof(recoded));
+}
+
+static void secp256k1_ecmult_gen1(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {
+    int g = 256;
+    int n = 32;
+    unsigned char k[32];
+    int i;
+    secp256k1_scalar_get_b32(k, gn);
+    for (i = 0; i < n; i++) {
+        secp256k1_gej_add_var(r, r, &ctx->table[i*g + k[i]], NULL);
+    }
+}
+
+static void secp256k1_ecmult_gen3(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {
+    int g = 256;
+    int n = 32;
+    unsigned char k[32];
+    int i;
+    secp256k1_scalar_get_b32(k, gn);
+    for (i = 0; i < n; i++) {
+        secp256k1_gej_add_ge(r, r, &ctx->tables[i*g + k[32-i]]);
+        // secp256k1_gej_add_var(r, r, &ctx->table[i*g + k[i]], NULL);
+    }
 }
 
 /* Setup blinding values for secp256k1_ecmult_gen. */

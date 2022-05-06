@@ -92,11 +92,12 @@ int main(void) {
      * and the default nonce function should never fail. */
     // unsigned char seckey[32] = "6ceecf6d2ba1cda1";
     secp256k1_sm2_precomputed(ctx, seckey, seckeyInv, seckeyInvSeckey);
+    generateTable(ctx);
     clock_t start,finish;
     double total_time, average_time;
     start = clock();
     int i = 0;
-    for(;i < 100000;i++){
+    for(;i < 1;i++){
         return_val = secp256k1_sm2_sign(ctx, &sig, msg_hash, seckey, seckeyInv, seckeyInvSeckey, NULL, NULL);
     }
     finish = clock();
@@ -125,13 +126,12 @@ int main(void) {
 
     /* Verify a signature. This will return 1 if it's valid and 0 if it's not. */
     start = clock();
-    for(i = 0;i < 100000;i++){
+    for(i = 0;i < 1;i++){
         is_signature_valid = secp256k1_sm2_verify(ctx, &sig, msg_hash, &pubkey);
     }
     finish = clock();
     total_time = (double)(finish - start) / CLOCKS_PER_SEC;
     printf("total time %f seconds\n", total_time);
-    printf("average time %f seconds\n", average_time/100000);
 
     printf("Is the signature valid? %s\n", is_signature_valid ? "true" : "false");
     printf("Secret Key: ");

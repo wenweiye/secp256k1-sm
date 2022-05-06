@@ -63,7 +63,7 @@ int main(void) {
     double total_time, average_time;
     start = clock();
     int i = 0;
-    for(;i < 100000;i++){
+    for(;i < 1;i++){
         return_val = secp256k1_sm2_encryption(ctx, msg_hash, sizeof(msg_hash), &pubkey, NULL, NULL, cip);
     }
     finish = clock();
@@ -74,9 +74,11 @@ int main(void) {
     
     /*** Decryption ***/
     start = clock();
-    for(i = 0;i < 100000;i++){
+    for(i = 0;i < 1;i++){
         is_signature_valid = secp256k1_sm2_decryption(cip, sizeof(msg_hash), m, seckey);
+        printf("%d\n",is_signature_valid);
     }
+    print_hex(m, sizeof(m));
     finish = clock();
     total_time = (double)(finish - start) / CLOCKS_PER_SEC;
     printf("total time %f seconds\n", total_time);
